@@ -22,16 +22,31 @@ public class ImprovedList<T> implements List<T> {
         return !contains;
     }
 
-    //올바르게 동작하지 않을 수 있는 상태의 메서드
+    // 클라이언트 측 락을 활용해 getLast 와 deleteLast를 동기화시킨 모습
     public static Object getLast(Vector list){
-        int lastIndex = list.size() - 1;
-        return list.get(lastIndex);
+        synchronized(list){ // 클라이언트 측 락
+            int lastIndex = list.size() - 1;
+            return list.get(lastIndex);
+        }
     }
 
     public static void deleteLast(Vector list){
-        int lastIndex = list.size() - 1;
-        list.remove(lastIndex);
+        synchronized(list){
+            int lastIndex = list.size() - 1;
+            list.remove(lastIndex);
+        }
     }
+
+    // ArrayIndexOutBoundsException이 발생할 수 있는 반복문 코드
+    public void foo(Vector vector){
+        synchronized (vector){ // 클라이언트 측 락을 사용해 반복문을 동기화시킨 모습
+            for(int i=0; i<vector.size(); i++){
+                doSomething(vector.get(i));
+            }
+        }
+    }
+
+    private void doSomething(Object o) {}
 
     // ... List 클래스의 다른 메서드도 clear와 비슷하게 구현
 
