@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +39,11 @@ public class LifecycleWebServer {
         @Override
         public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
             return false;
+        }
+
+        @Override
+        public Future<List<ImageData>> submit(Callable<List<ImageData>> task) {
+            return null;
         }
 
         @Override
