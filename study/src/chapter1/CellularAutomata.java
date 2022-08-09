@@ -148,7 +148,7 @@ public class CellularAutomata {
     /**
      * Memoizer 최종 버전
      */
-    public class Memoizer<A, V> implements Computable<A, V> {
+    public static class Memoizer<A, V> implements Computable<A, V> {
         private final ConcurrentMap<A, Future<V>> cache
                 = new ConcurrentHashMap<>();
         private final Computable<A, V> c;
