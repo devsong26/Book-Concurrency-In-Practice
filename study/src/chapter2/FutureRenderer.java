@@ -2,15 +2,14 @@ package chapter2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Future를 사용해 이미지 파일 다운로드 작업을 기다림
  */
 public class FutureRenderer {
+    private static final long TIME_BUDGET = 1;
+    private static final Ad DEFAULT_AD = new Ad();
     private final ExecutorService executor = new ExecutorService() {
         @Override
         public void shutdown() {
@@ -38,7 +37,7 @@ public class FutureRenderer {
         }
 
         @Override
-        public Future<List<ImageData>> submit(Callable<List<ImageData>> task) {
+        public Future submit(Callable task) {
             return null;
         }
 
@@ -89,6 +88,38 @@ public class FutureRenderer {
     }
 
     private List<ImageInfo> scanForImageInfo(CharSequence source) {
+        return null;
+    }
+
+    /**
+     * 제한된 시간 안에 광고 가져오기
+     */
+    Page renderPageWithAd() throws InterruptedException {
+        long endNanos = System.nanoTime() + TIME_BUDGET;
+
+        Future<Ad> f = executor.submit(new FetchAdTask());
+        // 광고 가져오는 작업을 등록했으니, 원래 페이지를 작업한다.
+        Page page = renderPageBody();
+
+        Ad ad;
+
+        try{
+            // 남은 시간 만큼만 대기한다.
+            long timeLeft = endNanos - System.nanoTime();
+            ad = f.get(timeLeft, TimeUnit.NANOSECONDS);
+        } catch (ExecutionException e) {
+            ad = DEFAULT_AD;
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            ad = DEFAULT_AD;
+            f.cancel(true);
+        }
+
+        page.setAd(ad);
+        return page;
+    }
+
+    private Page renderPageBody() {
         return null;
     }
 }

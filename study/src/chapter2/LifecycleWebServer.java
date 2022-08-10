@@ -42,7 +42,7 @@ public class LifecycleWebServer {
         }
 
         @Override
-        public Future<List<ImageData>> submit(Callable<List<ImageData>> task) {
+        public Future submit(Callable task) {
             return null;
         }
 
