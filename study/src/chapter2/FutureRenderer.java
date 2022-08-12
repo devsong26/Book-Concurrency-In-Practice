@@ -1,7 +1,6 @@
 package chapter2;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -38,6 +37,11 @@ public class FutureRenderer {
 
         @Override
         public Future submit(Callable task) {
+            return null;
+        }
+
+        @Override
+        public List<Future<TravelQuote>> invokeAll(List tasks, long time, TimeUnit unit) {
             return null;
         }
 
@@ -121,5 +125,60 @@ public class FutureRenderer {
 
     private Page renderPageBody() {
         return null;
+    }
+
+    /**
+     * 제한된 시간 안에 여행 관련 입찰 정보를 가져오도록 요청하는 코드
+     */
+    private class QuoteTask implements Callable<TravelQuote>{
+        private final TravelCompany company;
+        private final TravelInfo travelInfo;
+
+        public QuoteTask(TravelCompany company, TravelInfo travelInfo) {
+            this.company = company;
+            this.travelInfo = travelInfo;
+        }
+
+        @Override
+        public TravelQuote call() throws Exception {
+            return company.solicitQuote(travelInfo);
+        }
+
+        public TravelQuote getFailureQuote(Throwable cause) {
+            return null;
+        }
+
+        public TravelQuote getTimeoutQuote(CancellationException e) {
+            return null;
+        }
+    }
+
+    public List<TravelQuote> getRankedTravelQuotes(
+            TravelInfo travelInfo, Set<TravelCompany> companies,
+            Comparator<TravelQuote> ranking, long time, TimeUnit unit)
+            throws InterruptedException {
+        List<QuoteTask> tasks = new ArrayList<QuoteTask>();
+        for (TravelCompany company : companies)
+            tasks.add(new QuoteTask(company, travelInfo));
+
+        List<Future<TravelQuote>> futures =
+                executor.invokeAll(tasks, time, unit);
+
+        List<TravelQuote> quotes =
+                new ArrayList<>(tasks.size());
+        Iterator<QuoteTask> taskIter = tasks.iterator();
+        for (Future<TravelQuote> f : futures){
+            QuoteTask task = taskIter.next();
+            try{
+                quotes.add(f.get());
+            } catch (ExecutionException e) {
+                quotes.add(task.getFailureQuote(e.getCause()));
+            } catch (CancellationException e){
+                quotes.add(task.getTimeoutQuote(e));
+            }
+        }
+
+        Collections.sort(quotes, ranking);
+        return quotes;
     }
 }

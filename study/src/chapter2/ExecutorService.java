@@ -17,5 +17,7 @@ public interface ExecutorService<V> extends Executor {
     boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException;
 
     Future<V> submit(Callable<V> task);
+
+    List<Future<TravelQuote>> invokeAll(List<V> tasks, long time, TimeUnit unit);
     // .. 작업을 등록할 수 있는 몇가지 추가 메소드
 }

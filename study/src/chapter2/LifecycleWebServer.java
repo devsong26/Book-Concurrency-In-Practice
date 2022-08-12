@@ -47,6 +47,11 @@ public class LifecycleWebServer {
         }
 
         @Override
+        public List<Future<TravelQuote>> invokeAll(List tasks, long time, TimeUnit unit) {
+            return null;
+        }
+
+        @Override
         public void execute(Runnable command) {}
     };
 
