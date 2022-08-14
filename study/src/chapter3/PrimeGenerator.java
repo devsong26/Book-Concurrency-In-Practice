@@ -13,6 +13,7 @@ import java.util.List;
 @ThreadSafe
 public class PrimeGenerator implements Runnable {
 
+    private static final Thread SECONDS = new Thread();
     @GuardedBy("this")
     private final List<BigInteger> primes = new ArrayList<>();
     private volatile boolean cancelled;
@@ -33,6 +34,22 @@ public class PrimeGenerator implements Runnable {
 
     public synchronized List<BigInteger> get(){
         return new ArrayList<>(primes);
+    }
+
+    /**
+     * 1초간 소수를 계산하는 프로그램
+     */
+    List<BigInteger> aSecondOfPrimes() throws InterruptedException {
+        PrimeGenerator generator = new PrimeGenerator();
+        new Thread(generator).start();
+
+        try{
+            SECONDS.sleep(1);
+        } finally {
+            generator.cancel();
+        }
+
+        return generator.get();
     }
 
 }
