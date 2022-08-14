@@ -27,10 +27,6 @@ public class LogService {
         this.writer = writer;
     }
 
-    public void start(){
-        loggerThread.start();
-    }
-
     public void stop(){
         synchronized (this) { // 클라이언트 락
             isShutdown = true;
@@ -94,5 +90,16 @@ public class LogService {
         try{
             exec.execute(new WriteTask(msg));
         } catch(RejectedExecutionException ignored){}
+    }
+
+    /**
+     * 로그 서비스를 종료하는 종료 훅을 등록
+     */
+    public void start(){
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                LogService.this.stop();
+            }
+        });
     }
 }
