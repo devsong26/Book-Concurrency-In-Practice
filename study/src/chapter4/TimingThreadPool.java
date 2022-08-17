@@ -1,11 +1,10 @@
 package chapter4;
 
 import javax.lang.model.element.Element;
+import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Queue;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
@@ -65,4 +64,47 @@ public class TimingThreadPool extends ThreadPoolExecutor {
     private void process(Element e) {
     }
 
+    /**
+     * 순차적인 재귀 함수를 병렬화한 모습
+     */
+    public <T> void sequentialRecursive(List<ThNode<T>> nodes,
+                                       Collection<T> results){
+        for(ThNode<T> n : nodes){
+            results.add(n.compute());
+            sequentialRecursive(n.getChildren(), results);
+        }
+    }
+
+    public <T> void parallelRecursive(final Executor exec,
+                                      List<ThNode<T>> nodes,
+                                      final Collection<T> results){
+        for(final ThNode<T> n : nodes){
+            exec.execute(() -> results.add(n.compute()));
+            parallelRecursive(exec, n.getChildren(), results);
+        }
+    }
+
+    /**
+     * 병렬 연산 작업이 모두 끝나기를 기다리는 예제
+     */
+    public <T> Collection<T> getParallelResults(List<ThNode<T>> nodes)
+            throws InterruptedException{
+        ExecutorService exec = Executors.newCachedThreadPool();
+        Queue<T> resultQueue = new ConcurrentLinkedQueue<>();
+        parallelRecursive(exec, nodes, resultQueue);
+        exec.shutdown();
+        exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+        return resultQueue;
+    }
+
+}
+
+class ThNode<T> {
+    public T compute() {
+        return null;
+    }
+
+    public List<ThNode<T>> getChildren() {
+        return null;
+    }
 }
