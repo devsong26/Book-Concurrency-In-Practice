@@ -1,18 +1,20 @@
 package chapter5;
 
 import annotation.GuardedBy;
+import annotation.ThreadSafe;
 import chapter1.Point;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
-객체 간에 발생하는 락 순서에 의한 데드락, 이런 코드는 금물!
+ * 객체 간의 데드락을 방지하기 위해 오픈 호출을 사용하는 모습
  **/
+@ThreadSafe
 public class Taxi {
 
     @GuardedBy("this")
     private Point location, destination;
-
     private final Dispatcher dispatcher;
 
     public Taxi(Dispatcher dispatcher) {
@@ -24,8 +26,13 @@ public class Taxi {
     }
 
     public synchronized void setLocation(Point location){
-        this.location = location;
-        if(location.equals(destination))
+        boolean reachedDestination;
+
+        synchronized(this){
+            this.location = location;
+            reachedDestination = location.equals(destination);
+        }
+        if(reachedDestination)
             dispatcher.notifyAvailable(this);
     }
 
@@ -43,8 +50,14 @@ public class Taxi {
         }
 
         public synchronized Image getImage(){
+            Set<Taxi> copy;
+
+            synchronized(this){
+                copy = new HashSet<>(taxis);
+            }
+
             Image image = new Image();
-            for(Taxi t : taxis)
+            for(Taxi t : copy)
                 image.drawMarket(t.getLocation());
             return image;
         }
