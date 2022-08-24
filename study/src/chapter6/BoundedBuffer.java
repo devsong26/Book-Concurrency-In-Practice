@@ -19,12 +19,15 @@ public class BoundedBuffer<V> extends BaseBoundedBuffer<V>{
     }
 
     //만족할 때까지 대기: not-full
+    // BoundedBuffer.put 메서드에 조건부 알림 방법을 적용한 모습
     public synchronized void put(V v) throws InterruptedException {
         while(isFull())
             wait();
 
+        boolean wasEmpty = isEmpty();
         doPut(v);
-        notifyAll();
+        if(wasEmpty)
+            notifyAll();
     }
 
     // 만족할 때까지 대기: not-empty
