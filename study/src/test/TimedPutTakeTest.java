@@ -9,13 +9,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 import static test.BoundedBufferTest.xorShift;
 
-/**
- * BoundedBuffer를 테스트하는 프로듀서-컨슈머 구조의 테스트 프로그램
- */
-public class PutTakeTest {
+public class TimedPutTakeTest {
+
     private static final ExecutorService pool
             = Executors.newCachedThreadPool();
     private final AtomicInteger putSum = new AtomicInteger(0);
@@ -24,36 +21,62 @@ public class PutTakeTest {
     private final BoundedBuffer<Integer> bb;
     private final int nTrials, nPairs;
 
-    public static void main(String[] args){
-        new PutTakeTest(10, 10, 100_000).test(); // 예제 인자 값
-        pool.shutdown();
-    }
 
-    public PutTakeTest(int capacity, int nPairs, int nTrials) {
+    public TimedPutTakeTest(int capacity, int nPairs, int nTrials) {
         this.bb = new BoundedBuffer<>(capacity);
         this.nTrials = nTrials;
         this.nPairs = nPairs;
         this.barrier = new CyclicBarrier(nPairs * 2 + 1);
     }
 
-    void test(){
+    /**
+     * 배리어 기반 타이머를 사용한 테스트
+     */
+    public void test2(){
+        BarrierTimer timer = new BarrierTimer();
+
         try{
-            for(int i=0; i< nPairs; i++){
+            timer.clear();
+            for(int i=0; i<nPairs; i++){
                 pool.execute(new Producer());
                 pool.execute(new Consumer());
             }
-            
-            barrier.await();    // 모든 스레드가 준비될 때까지 대기
-            barrier.await();    // 모든 스레드의 작업이 끝날 때까지 대기
+
+            barrier.await();
+            barrier.await();
+            long nsPerItem = timer.getTime() / (nPairs * (long)nTrials);
+            System.out.println("Throughput: " + nsPerItem + " ns/item");
             assertEquals(putSum.get(), takeSum.get());
-        } catch (Exception e) {
+        } catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * PutTakeTest에서 사용한 프로듀서 클래스와 컨슈머 클래스
+     * TimedPutTakeTest 실행 프로그램
      */
+    public static void main2(String[] args) throws Exception {
+        int tpt = 100_000;  // 스레드별 실행 횟수
+
+        for(int cap = 1; cap <= 1_000; cap *= 10){
+            System.out.println("Capacity: " + cap);
+            for(int pairs = 1; pairs <= 128; pairs *= 2){
+                TimedPutTakeTest t = new TimedPutTakeTest(cap, pairs, tpt);
+                System.out.println("Pairs: " + pairs + "\t");
+                t.test();
+                System.out.println("\t");
+                Thread.sleep(1_000);
+                t.test();
+                System.out.println();
+                Thread.sleep(1_000);
+            }
+        }
+        pool.shutdown();
+    }
+
+    private void test() {
+    }
+
     private class Producer implements Runnable {
         public void run(){
             try{
@@ -90,28 +113,6 @@ public class PutTakeTest {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    /**
-     * 자원 유출 테스트
-     */
-    class Big{
-        double[] data = new double[100_000];
-    }
-
-    void testLeak() throws InterruptedException {
-        int CAPACITY = 1;
-        BoundedBuffer<Big> bb = new BoundedBuffer<>(CAPACITY);
-        int heapSize1 = 1; // 힙 스냅샷
-        for( int i=0; i<CAPACITY; i++)
-            bb.put(new Big());
-
-        for(int i=0; i< CAPACITY; i++)
-            bb.take();
-
-        int heapSize2 = 2; // 힙 스냅샷
-        int THRESHOLD = 1;
-        assertTrue(Math.abs(heapSize1 - heapSize2) < THRESHOLD);
     }
 
 }

@@ -10,4 +10,11 @@ public class Account {
 
     public void credit(DollarAmount amount) {
     }
+
+    public void setBalance(int i) {
+    }
+
+    public int getBalance2(){
+        return 0;
+    }
 }
