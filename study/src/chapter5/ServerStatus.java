@@ -6,7 +6,7 @@ import annotation.ThreadSafe;
 import java.util.Set;
 
 /**
- * 락 분할 대상
+ * 락이 분할된 ServerStatus 클래스
  */
 @ThreadSafe
 public class ServerStatus {
@@ -19,20 +19,28 @@ public class ServerStatus {
         this.queries = queries;
     }
 
-    public synchronized void addUser(String u){
-        users.add(u);
+    public void addUser(String u){
+        synchronized(users){
+            users.add(u);
+        }
     }
 
-    public synchronized void addQuery(String q){
-        queries.add(q);
+    public void addQuery(String q){
+        synchronized(queries){
+            queries.add(q);
+        }
     }
 
-    public synchronized void removeUser(String u){
-        users.remove(u);
+    public void removeUser(String u){
+        synchronized(users){
+            users.remove(u);
+        }
     }
 
-    public synchronized void removeQuery(String q){
-        queries.remove(q);
+    public void removeQuery(String q){
+        synchronized(queries){
+            queries.remove(q);
+        }
     }
 
 }
