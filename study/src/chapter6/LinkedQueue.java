@@ -2,6 +2,7 @@ package chapter6;
 
 import annotation.ThreadSafe;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
