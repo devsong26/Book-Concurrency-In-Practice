@@ -29,8 +29,4 @@ public class ReentrantLockPseudoRandom extends PseudoRandom{
         }
     }
 
-    private int calculateNext(int s) {
-        return 1;
-    }
-
 }
