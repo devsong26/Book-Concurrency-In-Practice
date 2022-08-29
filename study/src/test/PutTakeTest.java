@@ -1,7 +1,6 @@
 package test;
 
-import chapter5.BarrierTimer;
-import chapter5.BoundedBuffer;
+import try_1.chapter5.BoundedBuffer;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;

@@ -1,6 +1,6 @@
 package test;
 
-import chapter5.BoundedBuffer;
+import try_1.chapter5.BoundedBuffer;
 import junit.framework.TestCase;
 
 /**
