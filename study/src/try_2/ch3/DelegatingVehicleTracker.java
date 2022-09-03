@@ -3,6 +3,7 @@ package try_2.ch3;
 import annotation.ThreadSafe;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -20,10 +21,6 @@ public class DelegatingVehicleTracker {
         unmodifiableMap = Collections.unmodifiableMap(locations);
     }
 
-    public Map<String, Point> getLocations(){
-        return unmodifiableMap;
-    }
-
     public Point getLocation(String id){
         return locations.get(id);
     }
@@ -32,4 +29,13 @@ public class DelegatingVehicleTracker {
         if (locations.replace(id, new Point(x, y)) == null)
             throw new IllegalArgumentException("invalid vehicle name: " + id);
     }
+
+    /**
+     * 위치 정보에 대한 고정 스냅샷을 만들어 내는 메서드
+     */
+    public Map<String, Point> getLocations(){
+        return Collections.unmodifiableMap(
+                new HashMap<>(locations));
+    }
+
 }
