@@ -1,4 +1,4 @@
-package try_2.ch2;
+package try_2.ch3;
 
 import annotation.GuardedBy;
 import annotation.ThreadSafe;
