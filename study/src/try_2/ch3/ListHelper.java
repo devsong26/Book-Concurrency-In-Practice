@@ -13,13 +13,18 @@ import java.util.List;
 public class ListHelper<E> {
     public List<E> list = Collections.synchronizedList(new ArrayList<>());
 
+    /**
+     * 클라이언트 측 락을 사용해 putIfAbsent 메서드를 구현
+     */
     public synchronized boolean putIfAbsent(E x){
-        boolean absent = !list.contains(x);
+        synchronized(list){
+            boolean absent = !list.contains(x);
 
-        if (absent){
-            list.add(x);
+            if (absent){
+                list.add(x);
+            }
+
+            return absent;
         }
-
-        return absent;
     }
 }
