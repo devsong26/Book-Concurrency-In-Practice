@@ -1,6 +1,7 @@
 package try_2.ch3;
 
 import annotation.ThreadSafe;
+import try_2.ch1.Widget;
 
 import java.util.*;
 
@@ -190,6 +191,17 @@ public class ImprovedList<T> implements List<T> {
                 doSomething(vector.get(i));
             }
         }
+    }
+
+    /**
+     * Iterator를 사용해 List 클래스의 값을 반복해 뽑아내는 모습
+     */
+    private void foo3(){
+        List<Widget> widgetList = Collections.synchronizedList(new ArrayList<>());
+
+        // ConcurrentModificationException 이 발생할 수 있다.
+        for(Widget w : widgetList)
+            doSomething(w);
     }
 
 }
