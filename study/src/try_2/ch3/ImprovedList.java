@@ -181,4 +181,15 @@ public class ImprovedList<T> implements List<T> {
     private void doSomething(Object o) {
     }
 
+    /**
+     * 클라이언트 측 락을 사용해 반복문을 동기화시킨 모습
+     */
+    private void foo2(Vector vector){
+        synchronized(vector){
+            for(int i=0; i<vector.size(); i++){
+                doSomething(vector.get(i));
+            }
+        }
+    }
+
 }
