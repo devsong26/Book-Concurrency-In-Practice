@@ -143,14 +143,31 @@ public class ImprovedList<T> implements List<T> {
     /**
      * 올바르게 동작하지 않을 수 있는 상태의 메서드
      */
+//    public static Object getLast(Vector list){
+//        int lastIndex = list.size() - 1;
+//        return list.get(lastIndex);
+//    }
+//
+//    public static void deleteLast(Vector list){
+//        int lastIndex = list.size() - 1;
+//        list.remove(lastIndex);
+//    }
+
+    /**
+     * 클라이언트 측 락을 활용해 getLast와 deleteLast를 동기화시킨 모습
+     */
     public static Object getLast(Vector list){
-        int lastIndex = list.size() - 1;
-        return list.get(lastIndex);
+        synchronized(list){
+            int lastIndex = list.size() - 1;
+            return list.get(lastIndex);
+        }
     }
 
     public static void deleteLast(Vector list){
-        int lastIndex = list.size() - 1;
-        list.remove(lastIndex);
+        synchronized(list){
+            int lastIndex = list.size() - 1;
+            list.remove(lastIndex);
+        }
     }
 
 }
