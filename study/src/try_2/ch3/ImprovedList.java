@@ -2,10 +2,7 @@ package try_2.ch3;
 
 import annotation.ThreadSafe;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * 재구성 기법으로 putIfAbsent 메서드 구현
@@ -141,6 +138,19 @@ public class ImprovedList<T> implements List<T> {
     @Override
     public List<T> subList(int fromIndex, int toIndex) {
         return null;
+    }
+
+    /**
+     * 올바르게 동작하지 않을 수 있는 상태의 메서드
+     */
+    public static Object getLast(Vector list){
+        int lastIndex = list.size() - 1;
+        return list.get(lastIndex);
+    }
+
+    public static void deleteLast(Vector list){
+        int lastIndex = list.size() - 1;
+        list.remove(lastIndex);
     }
 
 }
