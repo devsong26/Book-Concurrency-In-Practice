@@ -170,4 +170,15 @@ public class ImprovedList<T> implements List<T> {
         }
     }
 
+    /**
+     * ArrayIndexOutOfBoundsException이 발생할 수 있는 반복문 코드
+     */
+    private void foo(Vector vector){
+        for(int i=0; i<vector.size(); i++)
+            doSomething(vector.get(i));
+    }
+
+    private void doSomething(Object o) {
+    }
+
 }
