@@ -3,12 +3,15 @@ package try_2.ch4;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 프로듀서 - 컨슈머 패턴을 활용한 데스크탑 검색 애플리케이션의 구조
  */
 public class FileCrawler implements Runnable{
 
+    private static int N_CONSUMERS;
+    private static int BOUND;
     private final BlockingQueue<File> fileQueue;
     private final FileFilter fileFilter;
     private final File root;
@@ -43,6 +46,23 @@ public class FileCrawler implements Runnable{
     private boolean alreadyIndexed(File entry) {
         return false;
     }
+
+    /**
+     * 데스크탑 검색 애플리케이션 동작시키기
+     */
+    public static void startIndexing(File[] roots){
+        BlockingQueue<File> queue = new LinkedBlockingQueue<>(BOUND);
+
+        FileFilter filter = file -> true;
+
+        for(File root : roots)
+            new Thread(new FileCrawler(queue, filter, root)).start();
+
+        for(int i=0; i<N_CONSUMERS; i++)
+            new Thread(new Indexer(queue)).start();
+
+    }
+
 
 }
 
