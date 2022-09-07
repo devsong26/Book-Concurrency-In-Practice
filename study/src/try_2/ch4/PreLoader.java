@@ -40,7 +40,20 @@ public class PreLoader {
         }
         }
 
-    private DataLoadException launderThrowable(Throwable cause) {
-        return null;
+//    private DataLoadException launderThrowable(Throwable cause) {
+//        return null;
+//    }
+
+    /**
+     * Throwable을 RuntimeException 으로 변환
+     */
+    public static RuntimeException launderThrowable(Throwable t){
+        if(t instanceof RuntimeException)
+            return (RuntimeException) t;
+        else if (t instanceof Error)
+            throw (Error) t;
+        else
+            throw new IllegalStateException("RuntimeException 이 아님", t);
     }
+
 }
