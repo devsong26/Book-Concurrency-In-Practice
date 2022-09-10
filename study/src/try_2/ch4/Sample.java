@@ -11,9 +11,6 @@ import java.util.concurrent.*;
  * HashMap과 동기화 기능을 사용해 구현한 첫 번째 캐시
  */
 public class Sample {
-    public interface Computable<A, V>{
-        V compute(A arg) throws InterruptedException;
-    }
 
     public class ExpensiveFunction implements Computable<String, BigInteger>{
         public BigInteger compute(String arg){
@@ -98,7 +95,7 @@ public class Sample {
     /**
      * Memoizer 최종 버전
      */
-    public class Memoizer<A, V> implements Computable<A, V>{
+    public static class Memoizer<A, V> implements Computable<A, V>{
         private final ConcurrentMap<A, Future<V>> cache
                 = new ConcurrentHashMap<>();
         private final Computable<A, V> c;
