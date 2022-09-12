@@ -20,7 +20,8 @@ public class FutureRenderer {
                     return result;
                 };
 
-        Future<List<ImageData>> future = new CompletableFuture<>();
+        Future<List<ImageData>> future = executor.submit(task);
+        renderText(source);
         try{
             List<ImageData> imageData = future.get();
             for(ImageData data : imageData)
@@ -33,6 +34,9 @@ public class FutureRenderer {
         }catch(ExecutionException e){
             throw launderThrowable(e.getCause());
         }
+    }
+
+    private void renderText(CharSequence source) {
     }
 
     private List<ImageInfo> scanForImageInfo(CharSequence source) {
