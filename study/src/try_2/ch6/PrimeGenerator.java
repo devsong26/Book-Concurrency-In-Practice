@@ -7,6 +7,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * volatile 변수를 사용해 취소 상태를 확인
  */
@@ -35,6 +37,22 @@ public class PrimeGenerator implements Runnable {
 
     public synchronized List<BigInteger> get(){
         return new ArrayList<>(primes);
+    }
+
+    /**
+     * 1초간 소수를 계산하는 프로그램
+     */
+    List<BigInteger> aSecondOfPrimes() throws InterruptedException {
+        PrimeGenerator generator = new PrimeGenerator();
+        new Thread(generator).start();
+
+        try{
+            SECONDS.sleep(1);
+        } finally {
+            generator.cancel();
+        }
+
+        return generator.get();
     }
 
 }
