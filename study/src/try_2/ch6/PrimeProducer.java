@@ -28,4 +28,13 @@ public class PrimeProducer extends Thread{
         interrupt();
     }
 
+    /**
+     * InterruptedException을 상위 메서드로 전달
+     */
+    BlockingQueue<Task> taskQueue;
+
+    public Task getNextTask() throws InterruptedException {
+        return taskQueue.take();
+    }
+
 }
