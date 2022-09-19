@@ -37,4 +37,25 @@ public class PrimeProducer extends Thread{
         return taskQueue.take();
     }
 
+    /**
+     * 인터럽트 상태를 종료 직전에 복구시키는 중단 불가능 작업
+     */
+    public Task getNextTask(BlockingQueue<Task> queue){
+        boolean isInterrupted = false;
+
+        try {
+            while(true){
+                try{
+                    return taskQueue.take();
+                } catch(InterruptedException e){
+                    isInterrupted = true;
+                    // 그냥 넘어가고 재시도
+                }
+            }
+        } finally {
+            if (!isInterrupted)
+                Thread.currentThread().interrupt();
+        }
+    }
+
 }
