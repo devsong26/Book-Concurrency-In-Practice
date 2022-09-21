@@ -1,10 +1,7 @@
 package try_2.ch6;
 
 import java.math.BigInteger;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 인터럽트를 사용해 작업을 취소
@@ -75,40 +72,59 @@ public class PrimeProducer extends Thread{
 
     /**
      * 작업 실행 전용 스레드에 인터럽트 거는 방법
-     * @param r
-     * @param timeout
-     * @param unit
      * @throws InterruptedException
      */
 
-    public static void timedRun(final Runnable r,
-                                long timeout, TimeUnit unit)
-        throws InterruptedException{
-        class ReThrowableTask implements Runnable {
-            private volatile Throwable t;
-            public void run(){
-                try{
-                    r.run();
-                }catch(Throwable t){
-                    this.t = t;
-                }
-            }
-            void rethrow(){
-                if(t != null)
-                    throw launderThrowable(t);
-            }
-        }
-
-        ReThrowableTask task = new ReThrowableTask();
-        final Thread taskThread = new Thread(task);
-        taskThread.start();
-        cancelExec.schedule(()->taskThread.interrupt(), timeout, unit);
-        taskThread.join(unit.toMillis(timeout));
-        task.rethrow();
-    }
+//    public static void timedRun(final Runnable r,
+//                                long timeout, TimeUnit unit)
+//        throws InterruptedException{
+//        class ReThrowableTask implements Runnable {
+//            private volatile Throwable t;
+//            public void run(){
+//                try{
+//                    r.run();
+//                }catch(Throwable t){
+//                    this.t = t;
+//                }
+//            }
+//            void rethrow(){
+//                if(t != null)
+//                    throw launderThrowable(t);
+//            }
+//        }
+//
+//        ReThrowableTask task = new ReThrowableTask();
+//        final Thread taskThread = new Thread(task);
+//        taskThread.start();
+//        cancelExec.schedule(()->taskThread.interrupt(), timeout, unit);
+//        taskThread.join(unit.toMillis(timeout));
+//        task.rethrow();
+//    }
 
     private static RuntimeException launderThrowable(Throwable t) {
         return new RuntimeException();
+    }
+
+    /**
+     * Future를 사용해 작업 중단하기
+     */
+    public static void timedRun(Runnable r,
+                                long timeout, TimeUnit unit)
+        throws InterruptedException {
+        ExecutorService taskExec = Executors.newScheduledThreadPool(1);
+        Future<?> task = taskExec.submit(r);
+
+        try{
+            task.get(timeout, unit);
+        }catch(TimeoutException e){
+            // finally 블록에서 작업이 중단될 것이다.
+        }catch(ExecutionException e){
+            //작업 내부에서 예외 상황 발생. 예외를 다시 던진다.
+            throw launderThrowable(e.getCause());
+        }finally{
+            //이미 종료됐다 하더라도 별다른 악영향은 없다.
+            task.cancel(true);  // 실행중이라면 인터럽트를 건다.
+        }
     }
 
 }
