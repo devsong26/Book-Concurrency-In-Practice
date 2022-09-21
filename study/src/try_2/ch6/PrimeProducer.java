@@ -66,12 +66,49 @@ public class PrimeProducer extends Thread{
      */
     private static final ScheduledExecutorService cancelExec = Executors.newScheduledThreadPool(1);
 
-    public static void timedRun(Runnable r,
-                                long timeout, TimeUnit unit){
-        final Thread taskThread = Thread.currentThread();
-        cancelExec.schedule(() -> taskThread.interrupt(), timeout, unit);
-        r.run();
+//    public static void timedRun(Runnable r,
+//                                long timeout, TimeUnit unit){
+//        final Thread taskThread = Thread.currentThread();
+//        cancelExec.schedule(() -> taskThread.interrupt(), timeout, unit);
+//        r.run();
+//    }
+
+    /**
+     * 작업 실행 전용 스레드에 인터럽트 거는 방법
+     * @param r
+     * @param timeout
+     * @param unit
+     * @throws InterruptedException
+     */
+
+    public static void timedRun(final Runnable r,
+                                long timeout, TimeUnit unit)
+        throws InterruptedException{
+        class ReThrowableTask implements Runnable {
+            private volatile Throwable t;
+            public void run(){
+                try{
+                    r.run();
+                }catch(Throwable t){
+                    this.t = t;
+                }
+            }
+            void rethrow(){
+                if(t != null)
+                    throw launderThrowable(t);
+            }
+        }
+
+        ReThrowableTask task = new ReThrowableTask();
+        final Thread taskThread = new Thread(task);
+        taskThread.start();
+        cancelExec.schedule(()->taskThread.interrupt(), timeout, unit);
+        taskThread.join(unit.toMillis(timeout));
+        task.rethrow();
     }
 
+    private static RuntimeException launderThrowable(Throwable t) {
+        return new RuntimeException();
+    }
 
 }
