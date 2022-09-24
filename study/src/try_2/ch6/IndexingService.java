@@ -55,13 +55,32 @@ public class IndexingService {
         }
     }
 
+    /**
+     * IndexingService의 컨슈머 스레드
+     */
     private class IndexerThread {
+        public void run() {
+            try {
+                while (true) {
+                    File file = queue.take();
+                    if (file == POISON)
+                        break;
+                    else
+                        indexFile(file);
+                }
+            } catch (InterruptedException consumed) {}
+        }
+
         public void start() {
 
         }
 
         public void join() {
         }
+    }
+
+    private void indexFile(File file) {
+
     }
 
     public void start() {
