@@ -12,6 +12,7 @@ public class LogWriter {
     private final BlockingQueue<String> queue;
     private final LoggerThread logger;
     private final int CAPACITY = 1;
+    private boolean shutdownRequested = false;
 
     public LogWriter(Writer writer) {
         this.queue = new LinkedBlockingQueue<>(CAPACITY);
@@ -22,8 +23,14 @@ public class LogWriter {
         logger.start();
     }
 
+    /**
+     * 로그 서비스에 종료 기능을 덧붙이지만 안정적이지 않은 방법
+     */
     public void log(String msg) throws InterruptedException {
-        queue.put(msg);
+        if(!shutdownRequested)
+            queue.put(msg);
+        else
+            throw new IllegalStateException("logger is shutdown");
     }
 
     private class LoggerThread extends Thread {
