@@ -22,7 +22,32 @@ public class IndexingService {
         this.root = root;
     }
 
+    /**
+     * IndexingService의 프로듀서 스레드
+     */
     private class CrawlerThread {
+        public void run() {
+            try {
+                crawl(root);
+            } catch(InterruptedException e) {
+                // 통과
+            } finally {
+                while (true) {
+                    try {
+                        queue.put(POISON);
+                        break;
+                    } catch (InterruptedException e1) {
+                        // 재시도1
+                    }
+                }
+
+            }
+        }
+
+        private void crawl(File root) throws InterruptedException {
+
+        }
+
         public void start() {
         }
 
