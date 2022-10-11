@@ -30,8 +30,6 @@ public class LogService {
         this.writer = writer;
     }
 
-    public void start(){ }
-
     public void stop() throws InterruptedException {
         try {
             exec.shutdown();
@@ -79,4 +77,15 @@ public class LogService {
 
         }
     }
+
+    /**
+     * 로그 서비스를 종료하는 종료 훅을 등록
+     */
+    public void start() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try{LogService.this.stop();}
+            catch (InterruptedException ignored){}
+        }));
+    }
+
 }
